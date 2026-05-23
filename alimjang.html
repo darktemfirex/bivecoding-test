@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 어린이집 알림장 생성기</title>
+    <link rel="stylesheet" href="alimjang.css">
+    <script type="module" src="alimjang.js" defer></script>
+</head>
+<body>
+    <div class="texture-overlay"></div>
+    <nav class="top-nav">
+        <a href="index.html" class="back-link">← 로또 생성기로 돌아가기</a>
+    </nav>
+    
+    <main class="app-container">
+        <header>
+            <h1>AI <span>알림장</span> 생성기</h1>
+            <p>우리 아이의 소중한 순간을 따뜻한 글로 전해드려요</p>
+        </header>
+
+        <section class="input-section">
+            <div class="card photo-card">
+                <h3>📸 사진 첨부 (최대 10장)</h3>
+                <div class="upload-area" id="drop-zone">
+                    <input type="file" id="photo-input" multiple accept="image/*" hidden>
+                    <label for="photo-input" class="upload-label">
+                        <span class="upload-icon">➕</span>
+                        <span>사진을 선택하거나 여기에 끌어다 놓으세요</span>
+                    </label>
+                </div>
+                <div id="photo-preview" class="photo-preview"></div>
+            </div>
+
+            <div class="card info-card">
+                <div class="input-group">
+                    <label for="child-name">아이 이름</label>
+                    <input type="text" id="child-name" placeholder="예: 지민이">
+                </div>
+                
+                <div class="input-group">
+                    <label for="keywords">상황 키워드</label>
+                    <input type="text" id="keywords" placeholder="예: 점심 맛있게 먹음, 블록 놀이, 낮잠 푹 잠">
+                </div>
+
+                <div class="input-group">
+                    <label for="reference-text">기존 알림장 (참조용)</label>
+                    <textarea id="reference-text" rows="4" placeholder="참조하고 싶은 기존 문장이나 말투를 입력해 주세요."></textarea>
+                </div>
+
+                <div class="input-group api-key-group">
+                    <label for="api-key">Gemini API Key</label>
+                    <input type="password" id="api-key" placeholder="API 키를 입력하세요">
+                    <small>개인 키는 저장되지 않으며 생성 시에만 사용됩니다.</small>
+                </div>
+
+                <button id="generate-btn" class="generate-btn">
+                    <span class="btn-text">AI 알림장 생성하기</span>
+                    <div class="loader" hidden></div>
+                </button>
+            </div>
+        </section>
+
+        <section class="result-section">
+            <div class="card result-card">
+                <div class="result-header">
+                    <h2>생성된 알림장</h2>
+                    <button id="copy-btn" class="icon-btn" title="복사하기">📋</button>
+                </div>
+                <div id="result-content" class="result-content">
+                    <p class="placeholder-text">정보를 입력하고 생성 버튼을 눌러주세요.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -282,3 +282,26 @@ button {
         gap: 0.5rem;
     }
 }
+
+.app-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--card-border);
+}
+
+.tool-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    background: var(--inner-bg);
+}
+
+.tool-link:hover {
+    transform: translateX(5px);
+    background: oklch(100% 0 0 / 20%);
+}
