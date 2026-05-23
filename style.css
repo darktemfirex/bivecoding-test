@@ -1,1 +1,233 @@
-/* Add styles here */
+:root {
+    /* Colors - using OKLCH for vibrancy */
+    --bg-color: oklch(15% 0.02 250);
+    --card-bg: oklch(100% 0 0 / 10%);
+    --card-border: oklch(100% 0 0 / 20%);
+    --text-primary: oklch(95% 0.01 250);
+    --text-secondary: oklch(75% 0.02 250);
+    --accent-color: oklch(70% 0.15 200);
+    
+    /* Lotto Ball Colors */
+    --ball-1: oklch(85% 0.18 85);   /* Yellow (1-10) */
+    --ball-11: oklch(65% 0.2 250);  /* Blue (11-20) */
+    --ball-21: oklch(60% 0.22 25);  /* Red (21-30) */
+    --ball-31: oklch(65% 0 0);      /* Gray (31-40) */
+    --ball-41: oklch(75% 0.2 145);  /* Green (41-45) */
+
+    /* Effects */
+    --glass-blur: 12px;
+    --shadow-deep: 
+        0 4px 6px -1px rgb(0 0 0 / 0.1),
+        0 2px 4px -2px rgb(0 0 0 / 0.1),
+        0 20px 25px -5px rgb(0 0 0 / 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Background Texture */
+.texture-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* App Container */
+.app-container {
+    width: 90%;
+    max-width: 600px;
+    padding: 2.5rem;
+    background: var(--card-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--card-border);
+    border-radius: 2rem;
+    box-shadow: var(--shadow-deep);
+    text-align: center;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+}
+
+header h1 span {
+    color: var(--accent-color);
+}
+
+header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+}
+
+/* Display Section */
+.display-section {
+    min-height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: oklch(0% 0 0 / 20%);
+    border-radius: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+}
+
+.ball-container {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.placeholder-text {
+    color: var(--text-secondary);
+    font-style: italic;
+    opacity: 0.6;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+button {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.primary-btn {
+    background: var(--accent-color);
+    color: oklch(10% 0 0);
+    box-shadow: 0 0 20px oklch(70% 0.15 200 / 30%);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px oklch(70% 0.15 200 / 50%);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}
+
+.secondary-btn {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--card-border);
+}
+
+.secondary-btn:hover {
+    background: oklch(100% 0 0 / 20%);
+}
+
+/* History Section */
+.history-section {
+    text-align: left;
+}
+
+.history-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar */
+.history-list::-webkit-scrollbar {
+    width: 4px;
+}
+.history-list::-webkit-scrollbar-thumb {
+    background: var(--card-border);
+    border-radius: 10px;
+}
+
+.history-item {
+    background: oklch(100% 0 0 / 5%);
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideIn 0.3s ease-out;
+}
+
+.history-numbers {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.history-ball-small {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+}
+
+.history-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .app-container {
+        padding: 1.5rem;
+        width: 95%;
+    }
+    header h1 {
+        font-size: 2rem;
+    }
+    .ball-container {
+        gap: 0.5rem;
+    }
+}

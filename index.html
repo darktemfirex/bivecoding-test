@@ -1,14 +1,38 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프리미엄 로또 번호 생성기</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="main.js" defer></script>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+    <div class="texture-overlay"></div>
+    <main class="app-container">
+        <header>
+            <h1>LOTTO <span>GENERATOR</span></h1>
+            <p>당신의 행운을 확인해보세요</p>
+        </header>
+
+        <section class="display-section">
+            <div id="ball-container" class="ball-container">
+                <!-- Lotto balls will be injected here -->
+                <div class="placeholder-text">행운의 번호를 생성하세요</div>
+            </div>
+        </section>
+
+        <section class="controls">
+            <button id="generate-btn" class="primary-btn">번호 생성하기</button>
+            <button id="clear-btn" class="secondary-btn">초기화</button>
+        </section>
+
+        <section class="history-section">
+            <h2>최근 생성 내역</h2>
+            <div id="history-list" class="history-list">
+                <!-- History items will be injected here -->
+            </div>
+        </section>
+    </main>
 </body>
 </html>
