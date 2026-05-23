@@ -10,7 +10,12 @@ const btnText = generateBtn.querySelector('.btn-text');
 const loader = generateBtn.querySelector('.loader');
 const resultContent = document.getElementById('result-content');
 const copyBtn = document.getElementById('copy-btn');
-const apiKeyInput = document.getElementById('api-key');
+
+/**
+ * 보안을 위해 API 키는 별도의 설정 파일이나 환경 변수에서 관리하는 것이 좋습니다.
+ * 아래 변수에 실제 키를 넣어 사용하세요. (.env 파일에 저장된 값을 사용하는 방식)
+ */
+const OPENAI_API_KEY = ''; // 여기에 키를 입력하거나 빌드 프로세스를 통해 주입하세요.
 
 let uploadedFiles = [];
 
@@ -67,7 +72,7 @@ async function fileToBase64(file) {
 }
 
 generateBtn.addEventListener('click', async () => {
-    const apiKey = apiKeyInput.value;
+    const apiKey = OPENAI_API_KEY;
     const childName = document.getElementById('child-name').value;
     const keywords = document.getElementById('keywords').value;
     const referenceText = document.getElementById('reference-text').value;
