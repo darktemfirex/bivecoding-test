@@ -3,46 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프리미엄 로또 번호 생성기</title>
+    <title>AI 어린이집 알림장 생성기 (Powered by ChatGPT)</title>
     <link rel="stylesheet" href="style.css">
     <script type="module" src="main.js" defer></script>
 </head>
 <body>
     <div class="texture-overlay"></div>
+    
     <main class="app-container">
         <header>
-            <div class="header-top">
-                <button id="theme-toggle" class="icon-btn" aria-label="테마 전환">
-                    <span class="sun-icon">☀️</span>
-                    <span class="moon-icon">🌙</span>
-                </button>
-            </div>
-            <h1>LOTTO <span>GENERATOR</span></h1>
-            <p>당신의 행운을 확인해보세요</p>
+            <h1>AI <span>알림장</span> 생성기</h1>
+            <p>ChatGPT를 활용하여 우리 아이의 소중한 순간을 글로 전해드려요</p>
         </header>
 
-        <section class="display-section">
-            <div id="ball-container" class="ball-container">
-                <!-- Lotto balls will be injected here -->
-                <div class="placeholder-text">행운의 번호를 생성하세요</div>
+        <section class="input-section">
+            <div class="card photo-card">
+                <h3>📸 사진 첨부 (최대 10장)</h3>
+                <div class="upload-area" id="drop-zone">
+                    <input type="file" id="photo-input" multiple accept="image/*" hidden>
+                    <label for="photo-input" class="upload-label">
+                        <span class="upload-icon">➕</span>
+                        <span>사진을 선택하거나 여기에 끌어다 놓으세요</span>
+                    </label>
+                </div>
+                <div id="photo-preview" class="photo-preview"></div>
+            </div>
+
+            <div class="card info-card">
+                <div class="input-group">
+                    <label for="child-name">아이 이름</label>
+                    <input type="text" id="child-name" placeholder="예: 지민이">
+                </div>
+                
+                <div class="input-group">
+                    <label for="keywords">상황 키워드</label>
+                    <input type="text" id="keywords" placeholder="예: 점심 맛있게 먹음, 블록 놀이, 낮잠 푹 잠">
+                </div>
+
+                <div class="input-group">
+                    <label for="reference-text">기존 알림장 (참조용)</label>
+                    <textarea id="reference-text" rows="4" placeholder="참조하고 싶은 기존 문장이나 말투를 입력해 주세요."></textarea>
+                </div>
+
+                <div class="input-group api-key-group">
+                    <label for="api-key">OpenAI API Key</label>
+                    <input type="password" id="api-key" placeholder="sk-...">
+                    <small>API 키는 브라우저 세션에만 유지되며 서버에 저장되지 않습니다.</small>
+                </div>
+
+                <button id="generate-btn" class="generate-btn">
+                    <span class="btn-text">AI 알림장 생성하기</span>
+                    <div class="loader" hidden></div>
+                </button>
             </div>
         </section>
 
-        <section class="controls">
-            <button id="generate-btn" class="primary-btn">번호 생성하기</button>
-            <button id="clear-btn" class="secondary-btn">초기화</button>
-        </section>
-
-        <section class="history-section">
-            <h2>최근 생성 내역</h2>
-            <div id="history-list" class="history-list">
-                <!-- History items will be injected here -->
+        <section class="result-section">
+            <div class="card result-card">
+                <div class="result-header">
+                    <h2>생성된 알림장</h2>
+                    <button id="copy-btn" class="icon-btn" title="복사하기">📋</button>
+                </div>
+                <div id="result-content" class="result-content">
+                    <p class="placeholder-text">정보를 입력하고 생성 버튼을 눌러주세요.</p>
+                </div>
             </div>
         </section>
-
-        <footer class="app-footer">
-            <a href="alimjang.html" class="tool-link">어린이집 AI 알림장 생성기 →</a>
-        </footer>
     </main>
 </body>
 </html>

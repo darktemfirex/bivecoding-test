@@ -1,185 +1,171 @@
 /**
- * LottoBall Web Component
- * Encapsulates the visual representation of a single Lotto ball.
+ * Alimjang Generator Logic (OpenAI Version)
  */
-class LottoBall extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
 
-    connectedCallback() {
-        this.render();
-    }
-
-    static get observedAttributes() {
-        return ['number'];
-    }
-
-    attributeChangedCallback() {
-        this.render();
-    }
-
-    get number() {
-        return parseInt(this.getAttribute('number')) || 0;
-    }
-
-    getBallColor() {
-        const num = this.number;
-        if (num <= 10) return 'var(--ball-1)';
-        if (num <= 20) return 'var(--ball-11)';
-        if (num <= 30) return 'var(--ball-21)';
-        if (num <= 40) return 'var(--ball-31)';
-        return 'var(--ball-41)';
-    }
-
-    render() {
-        const color = this.getBallColor();
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    display: inline-block;
-                    width: 50px;
-                    height: 50px;
-                    border-radius: 50%;
-                    background: ${color};
-                    box-shadow: 
-                        inset -4px -4px 8px rgba(0,0,0,0.3),
-                        inset 4px 4px 8px rgba(255,255,255,0.3),
-                        0 10px 20px rgba(0,0,0,0.2);
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    color: white;
-                    font-weight: 800;
-                    font-size: 1.2rem;
-                    user-select: none;
-                    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-                    opacity: 0;
-                    transform: scale(0.5);
-                    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                }
-
-                @keyframes popIn {
-                    to {
-                        opacity: 1;
-                        transform: scale(1);
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    :host {
-                        width: 40px;
-                        height: 40px;
-                        font-size: 1rem;
-                    }
-                }
-            </style>
-            ${this.number}
-        `;
-    }
-}
-
-customElements.define('lotto-ball', LottoBall);
-
-/**
- * App State & Logic
- */
-const ballContainer = document.getElementById('ball-container');
-const historyList = document.getElementById('history-list');
+const photoInput = document.getElementById('photo-input');
+const photoPreview = document.getElementById('photo-preview');
+const dropZone = document.getElementById('drop-zone');
 const generateBtn = document.getElementById('generate-btn');
-const clearBtn = document.getElementById('clear-btn');
-const themeToggle = document.getElementById('theme-toggle');
+const btnText = generateBtn.querySelector('.btn-text');
+const loader = generateBtn.querySelector('.loader');
+const resultContent = document.getElementById('result-content');
+const copyBtn = document.getElementById('copy-btn');
+const apiKeyInput = document.getElementById('api-key');
 
-/**
- * Theme Management
- */
-function initTheme() {
-    const savedTheme = localStorage.getItem('lotto-theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', initialTheme);
-}
+let uploadedFiles = [];
 
-themeToggle.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('lotto-theme', newTheme);
+// --- File Handling ---
+
+photoInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
 });
 
-initTheme();
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--alim-secondary)';
+});
 
-let history = [];
+dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--alim-border)';
+});
 
-function generateLottoNumbers() {
-    const numbers = new Set();
-    while (numbers.size < 6) {
-        const num = Math.floor(Math.random() * 45) + 1;
-        numbers.add(num);
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--alim-border)';
+    handleFiles(e.dataTransfer.files);
+});
+
+function handleFiles(files) {
+    const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    
+    if (uploadedFiles.length + newFiles.length > 10) {
+        alert('최대 10장까지만 업로드 가능합니다.');
+        return;
     }
-    return Array.from(numbers).sort((a, b) => a - b);
-}
 
-function renderBalls(numbers) {
-    ballContainer.innerHTML = '';
-    numbers.forEach((num, index) => {
-        const ball = document.createElement('lotto-ball');
-        ball.setAttribute('number', num);
-        // Staggered animation
-        ball.style.animationDelay = `${index * 0.1}s`;
-        ballContainer.appendChild(ball);
+    newFiles.forEach(file => {
+        uploadedFiles.push(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'preview-img';
+            photoPreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
     });
 }
 
-function addToHistory(numbers) {
-    const time = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    history.unshift({ numbers, time });
-    
-    // Keep only last 10
-    if (history.length > 10) history.pop();
-    
-    updateHistoryUI();
+// --- AI Generation (OpenAI) ---
+
+async function fileToBase64(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(file);
+    });
 }
 
-function updateHistoryUI() {
-    historyList.innerHTML = '';
-    history.forEach(item => {
-        const historyItem = document.createElement('div');
-        historyItem.className = 'history-item';
-        
-        const ballsHtml = item.numbers.map(num => {
-            let color = 'var(--ball-41)';
-            if (num <= 10) color = 'var(--ball-1)';
-            else if (num <= 20) color = 'var(--ball-11)';
-            else if (num <= 30) color = 'var(--ball-21)';
-            else if (num <= 40) color = 'var(--ball-31)';
-            
-            return `<div class="history-ball-small" style="background: ${color}">${num}</div>`;
-        }).join('');
-        
-        historyItem.innerHTML = `
-            <div class="history-numbers">${ballsHtml}</div>
-            <span class="history-time">${item.time}</span>
+generateBtn.addEventListener('click', async () => {
+    const apiKey = apiKeyInput.value;
+    const childName = document.getElementById('child-name').value;
+    const keywords = document.getElementById('keywords').value;
+    const referenceText = document.getElementById('reference-text').value;
+
+    if (!apiKey) {
+        alert('OpenAI API Key를 입력해주세요.');
+        return;
+    }
+    if (!childName || !keywords) {
+        alert('아이 이름과 상황 키워드를 입력해주세요.');
+        return;
+    }
+
+    try {
+        setLoading(true);
+
+        const imageContents = await Promise.all(
+            uploadedFiles.map(async file => ({
+                type: "image_url",
+                image_url: {
+                    url: `data:${file.type};base64,${await fileToBase64(file)}`
+                }
+            }))
+        );
+
+        const prompt = `
+            당신은 따뜻하고 세심한 어린이집 선생님입니다. 
+            다음 정보를 바탕으로 학부모님께 보낼 알림장 문장을 작성해주세요.
+
+            1. 아이 이름: ${childName}
+            2. 상황 키워드: ${keywords}
+            3. 참조할 기존 문장/말투: ${referenceText}
+
+            [지침]
+            - 첨부된 사진(있는 경우)의 분위기와 아이의 표정을 설명에 녹여주세요.
+            - 키워드를 자연스럽게 문장으로 풀어주세요.
+            - 말투는 정중하면서도 다정하게, 학부모님이 안심하고 기분 좋아지도록 작성해주세요.
+            - 너무 길지 않게, 하지만 진정성이 느껴지도록 작성해주세요.
+            - '참조할 기존 문장'이 있다면 그 말투나 형식을 최대한 반영해주세요.
+            - 한국어로 답변해주세요.
         `;
-        historyList.appendChild(historyItem);
-    });
-}
 
-generateBtn.addEventListener('click', () => {
-    const numbers = generateLottoNumbers();
-    renderBalls(numbers);
-    addToHistory(numbers);
-    
-    // Add a little feedback to the button
-    generateBtn.style.transform = 'scale(0.95)';
-    setTimeout(() => generateBtn.style.transform = '', 100);
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            { type: "text", text: prompt },
+                            ...imageContents
+                        ]
+                    }
+                ],
+                max_tokens: 1000
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error.message);
+        }
+
+        const generatedText = data.choices[0].message.content;
+        resultContent.innerHTML = `<p>${generatedText.replace(/\n/g, '<br>')}</p>`;
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('생성 중 오류가 발생했습니다: ' + error.message);
+    } finally {
+        setLoading(false);
+    }
 });
 
-clearBtn.addEventListener('click', () => {
-    ballContainer.innerHTML = '<div class="placeholder-text">행운의 번호를 생성하세요</div>';
-    history = [];
-    updateHistoryUI();
+function setLoading(isLoading) {
+    generateBtn.disabled = isLoading;
+    btnText.style.opacity = isLoading ? '0' : '1';
+    loader.hidden = !isLoading;
+    if (isLoading) {
+        resultContent.innerHTML = '<p class="placeholder-text">AI가 열심히 알림장을 작성하고 있습니다... ✨</p>';
+    }
+}
+
+// --- Utility ---
+
+copyBtn.addEventListener('click', () => {
+    const text = resultContent.innerText;
+    if (text && text !== '정보를 입력하고 생성 버튼을 눌러주세요.') {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalIcon = copyBtn.innerText;
+            copyBtn.innerText = '✅';
+            setTimeout(() => copyBtn.innerText = originalIcon, 2000);
+        });
+    }
 });
