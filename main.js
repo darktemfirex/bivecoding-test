@@ -89,6 +89,28 @@ const ballContainer = document.getElementById('ball-container');
 const historyList = document.getElementById('history-list');
 const generateBtn = document.getElementById('generate-btn');
 const clearBtn = document.getElementById('clear-btn');
+const themeToggle = document.getElementById('theme-toggle');
+
+/**
+ * Theme Management
+ */
+function initTheme() {
+    const savedTheme = localStorage.getItem('lotto-theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', initialTheme);
+}
+
+themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('lotto-theme', newTheme);
+});
+
+initTheme();
 
 let history = [];
 

@@ -1,11 +1,13 @@
 :root {
-    /* Colors - using OKLCH for vibrancy */
+    /* Default - Dark Mode (Existing) */
     --bg-color: oklch(15% 0.02 250);
     --card-bg: oklch(100% 0 0 / 10%);
     --card-border: oklch(100% 0 0 / 20%);
     --text-primary: oklch(95% 0.01 250);
     --text-secondary: oklch(75% 0.02 250);
     --accent-color: oklch(70% 0.15 200);
+    --inner-bg: oklch(0% 0 0 / 20%);
+    --history-item-bg: oklch(100% 0 0 / 5%);
     
     /* Lotto Ball Colors */
     --ball-1: oklch(85% 0.18 85);   /* Yellow (1-10) */
@@ -20,6 +22,22 @@
         0 4px 6px -1px rgb(0 0 0 / 0.1),
         0 2px 4px -2px rgb(0 0 0 / 0.1),
         0 20px 25px -5px rgb(0 0 0 / 0.2);
+    --transition-speed: 0.4s;
+}
+
+[data-theme="light"] {
+    --bg-color: oklch(95% 0.01 250);
+    --card-bg: oklch(100% 0 0 / 70%);
+    --card-border: oklch(0% 0 0 / 10%);
+    --text-primary: oklch(20% 0.02 250);
+    --text-secondary: oklch(40% 0.02 250);
+    --accent-color: oklch(60% 0.15 220);
+    --inner-bg: oklch(0% 0 0 / 5%);
+    --history-item-bg: oklch(0% 0 0 / 3%);
+    --shadow-deep: 
+        0 10px 15px -3px rgb(0 0 0 / 0.1),
+        0 4px 6px -4px rgb(0 0 0 / 0.1),
+        0 20px 25px -5px rgb(0 0 0 / 0.05);
 }
 
 * {
@@ -27,6 +45,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed), box-shadow var(--transition-speed), backdrop-filter var(--transition-speed);
 }
 
 body {
@@ -64,6 +83,34 @@ body {
     text-align: center;
 }
 
+header {
+    margin-bottom: 2rem;
+}
+
+.header-top {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.icon-btn {
+    background: var(--inner-bg);
+    border: 1px solid var(--card-border);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0;
+    flex: none;
+}
+
+[data-theme="light"] .sun-icon { display: none; }
+[data-theme="dark"] .moon-icon { display: none; }
+
 header h1 {
     font-size: 2.5rem;
     font-weight: 800;
@@ -78,7 +125,6 @@ header h1 span {
 header p {
     color: var(--text-secondary);
     font-size: 1.1rem;
-    margin-bottom: 3rem;
 }
 
 /* Display Section */
@@ -87,7 +133,7 @@ header p {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: oklch(0% 0 0 / 20%);
+    background: var(--inner-bg);
     border-radius: 1.5rem;
     margin-bottom: 2rem;
     padding: 1.5rem;
@@ -130,6 +176,10 @@ button {
     box-shadow: 0 0 20px oklch(70% 0.15 200 / 30%);
 }
 
+[data-theme="light"] .primary-btn {
+    color: white;
+}
+
 .primary-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 0 30px oklch(70% 0.15 200 / 50%);
@@ -140,7 +190,7 @@ button {
 }
 
 .secondary-btn {
-    background: var(--card-bg);
+    background: var(--inner-bg);
     color: var(--text-primary);
     border: 1px solid var(--card-border);
 }
@@ -182,13 +232,14 @@ button {
 }
 
 .history-item {
-    background: oklch(100% 0 0 / 5%);
+    background: var(--history-item-bg);
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     animation: slideIn 0.3s ease-out;
+    border: 1px solid var(--card-border);
 }
 
 .history-numbers {

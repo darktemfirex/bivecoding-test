@@ -9,6 +9,7 @@ A modern, high-performance Lotto number generator built with pure HTML, CSS, and
   - Automatically sorts numbers in ascending order.
 - **Visual Design:**
   - **Premium UI:** Glassmorphism effects, subtle noise textures, and deep multi-layered shadows.
+  - **Theme Support:** Modern Dark/Light mode toggle with persistence and system preference detection.
   - **Dynamic Colors:** Lotto balls colored based on standard ranges (1-10: Yellow, 11-20: Blue, 21-30: Red, 31-40: Gray, 41-45: Green).
   - **Animations:** Smooth entry animations for balls when generated.
   - **Responsive Layout:** Works perfectly on mobile and desktop using Container Queries and Flexbox/Grid.
