@@ -1,5 +1,5 @@
 /**
- * Alimjang Generator Logic (OpenAI Version)
+ * Alimjang Generator Logic (Cloudflare Workers Version)
  */
 
 const photoInput = document.getElementById('photo-input');
@@ -10,12 +10,6 @@ const btnText = generateBtn.querySelector('.btn-text');
 const loader = generateBtn.querySelector('.loader');
 const resultContent = document.getElementById('result-content');
 const copyBtn = document.getElementById('copy-btn');
-
-/**
- * 보안을 위해 API 키는 별도의 설정 파일이나 환경 변수에서 관리하는 것이 좋습니다.
- * 아래 변수에 실제 키를 넣어 사용하세요. (.env 파일에 저장된 값을 사용하는 방식)
- */
-const OPENAI_API_KEY = ''; // 여기에 키를 입력하거나 빌드 프로세스를 통해 주입하세요.
 
 let uploadedFiles = [];
 
@@ -61,26 +55,22 @@ function handleFiles(files) {
     });
 }
 
-// --- AI Generation (OpenAI) ---
+// --- AI Generation (via Worker) ---
 
 async function fileToBase64(file) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
         reader.readAsDataURL(file);
     });
 }
 
 generateBtn.addEventListener('click', async () => {
-    const apiKey = OPENAI_API_KEY;
     const childName = document.getElementById('child-name').value;
     const keywords = document.getElementById('keywords').value;
     const referenceText = document.getElementById('reference-text').value;
 
-    if (!apiKey) {
-        alert('OpenAI API Key를 입력해주세요.');
-        return;
-    }
     if (!childName || !keywords) {
         alert('아이 이름과 상황 키워드를 입력해주세요.');
         return;
@@ -89,60 +79,31 @@ generateBtn.addEventListener('click', async () => {
     try {
         setLoading(true);
 
-        const imageContents = await Promise.all(
-            uploadedFiles.map(async file => ({
-                type: "image_url",
-                image_url: {
-                    url: `data:${file.type};base64,${await fileToBase64(file)}`
-                }
-            }))
+        const imageDatas = await Promise.all(
+            uploadedFiles.map(file => fileToBase64(file))
         );
 
-        const prompt = `
-            당신은 따뜻하고 세심한 어린이집 선생님입니다. 
-            다음 정보를 바탕으로 학부모님께 보낼 알림장 문장을 작성해주세요.
-
-            1. 아이 이름: ${childName}
-            2. 상황 키워드: ${keywords}
-            3. 참조할 기존 문장/말투: ${referenceText}
-
-            [지침]
-            - 첨부된 사진(있는 경우)의 분위기와 아이의 표정을 설명에 녹여주세요.
-            - 키워드를 자연스럽게 문장으로 풀어주세요.
-            - 말투는 정중하면서도 다정하게, 학부모님이 안심하고 기분 좋아지도록 작성해주세요.
-            - 너무 길지 않게, 하지만 진정성이 느껴지도록 작성해주세요.
-            - '참조할 기존 문장'이 있다면 그 말투나 형식을 최대한 반영해주세요.
-            - 한국어로 답변해주세요.
-        `;
-
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        // Call the Cloudflare Worker endpoint
+        const response = await fetch('/generateAlimjang', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: "gpt-4o",
-                messages: [
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: prompt },
-                            ...imageContents
-                        ]
-                    }
-                ],
-                max_tokens: 1000
+                childName,
+                keywords,
+                referenceText,
+                images: imageDatas
             })
         });
 
         const data = await response.json();
         
-        if (data.error) {
-            throw new Error(data.error.message);
+        if (!response.ok) {
+            throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
         }
 
-        const generatedText = data.choices[0].message.content;
+        const generatedText = data.text;
         resultContent.innerHTML = `<p>${generatedText.replace(/\n/g, '<br>')}</p>`;
 
     } catch (error) {
@@ -179,8 +140,25 @@ copyBtn.addEventListener('click', () => {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker registered', reg))
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => {
+                console.log('Service Worker registered', reg);
+                // Check for updates
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed') {
+                            if (navigator.serviceWorker.controller) {
+                                // New content is available; please refresh.
+                                console.log('New content is available; please refresh.');
+                                if (confirm('새로운 버전이 업데이트되었습니다. 페이지를 새로고침하시겠습니까?')) {
+                                    window.location.reload();
+                                }
+                            }
+                        }
+                    };
+                };
+            })
             .catch(err => console.error('Service Worker registration failed', err));
     });
 }
