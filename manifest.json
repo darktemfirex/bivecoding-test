@@ -1,6 +1,6 @@
 {
-  "name": "AI 어린이집 알림장 생성기",
-  "short_name": "AI 알림장",
+  "name": "AI 어린이집 생성기",
+  "short_name": "AI 어린이집",
   "description": "ChatGPT를 활용한 따뜻한 맞춤형 어린이집 알림장 생성기",
   "start_url": "/",
   "display": "standalone",
