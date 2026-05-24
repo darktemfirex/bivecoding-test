@@ -1,5 +1,5 @@
 /**
- * Alimjang Generator Logic (Cloudflare Workers Version)
+ * Alimjang Generator Logic (OpenAI direct call version)
  */
 
 const photoInput = document.getElementById('photo-input');
@@ -10,8 +10,14 @@ const btnText = generateBtn.querySelector('.btn-text');
 const loader = generateBtn.querySelector('.loader');
 const resultContent = document.getElementById('result-content');
 const copyBtn = document.getElementById('copy-btn');
+const apiKeyInput = document.getElementById('api-key');
 
 let uploadedFiles = [];
+
+apiKeyInput.value = sessionStorage.getItem('openaiApiKey') || '';
+apiKeyInput.addEventListener('input', () => {
+    sessionStorage.setItem('openaiApiKey', apiKeyInput.value.trim());
+});
 
 // --- File Handling ---
 
@@ -55,21 +61,27 @@ function handleFiles(files) {
     });
 }
 
-// --- AI Generation (via Worker) ---
+// --- AI Generation (OpenAI direct call) ---
 
 async function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
 }
 
 generateBtn.addEventListener('click', async () => {
+    const apiKey = apiKeyInput.value.trim();
     const childName = document.getElementById('child-name').value;
     const keywords = document.getElementById('keywords').value;
     const referenceText = document.getElementById('reference-text').value;
+
+    if (!apiKey) {
+        alert('OpenAI API Key를 입력해주세요.');
+        return;
+    }
 
     if (!childName || !keywords) {
         alert('아이 이름과 상황 키워드를 입력해주세요.');
@@ -79,31 +91,60 @@ generateBtn.addEventListener('click', async () => {
     try {
         setLoading(true);
 
-        const imageDatas = await Promise.all(
-            uploadedFiles.map(file => fileToBase64(file))
+        const imageContents = await Promise.all(
+            uploadedFiles.map(async file => ({
+                type: "image_url",
+                image_url: {
+                    url: `data:${file.type};base64,${await fileToBase64(file)}`
+                }
+            }))
         );
 
-        // Call the Cloudflare Worker endpoint
-        const response = await fetch('/generateAlimjang', {
+        const prompt = `
+            당신은 따뜻하고 세심한 어린이집 선생님입니다. 
+            다음 정보를 바탕으로 학부모님께 보낼 알림장 문장을 작성해주세요.
+
+            1. 아이 이름: ${childName}
+            2. 상황 키워드: ${keywords}
+            3. 참조할 기존 문장/말투: ${referenceText}
+
+            [지침]
+            - 첨부된 사진(있는 경우)의 분위기와 아이의 표정을 설명에 녹여주세요.
+            - 키워드를 자연스럽게 문장으로 풀어주세요.
+            - 말투는 정중하면서도 다정하게, 학부모님이 안심하고 기분 좋아지도록 작성해주세요.
+            - 너무 길지 않게, 하지만 진정성이 느껴지도록 작성해주세요.
+            - '참조할 기존 문장'이 있다면 그 말투나 형식을 최대한 반영해주세요.
+            - 한국어로 답변해주세요.
+        `;
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                childName,
-                keywords,
-                referenceText,
-                images: imageDatas
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            { type: "text", text: prompt },
+                            ...imageContents
+                        ]
+                    }
+                ],
+                max_tokens: 1000
             })
         });
 
         const data = await response.json();
         
-        if (!response.ok) {
-            throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
+        if (data.error) {
+            throw new Error(data.error.message);
         }
 
-        const generatedText = data.text;
+        const generatedText = data.choices[0].message.content;
         resultContent.innerHTML = `<p>${generatedText.replace(/\n/g, '<br>')}</p>`;
 
     } catch (error) {
