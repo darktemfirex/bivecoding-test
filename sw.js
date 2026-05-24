@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alimjang-v3';
+const CACHE_NAME = 'alimjang-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
