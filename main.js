@@ -10,14 +10,8 @@ const btnText = generateBtn.querySelector('.btn-text');
 const loader = generateBtn.querySelector('.loader');
 const resultContent = document.getElementById('result-content');
 const copyBtn = document.getElementById('copy-btn');
-const apiKeyInput = document.getElementById('api-key');
 
 let uploadedFiles = [];
-
-apiKeyInput.value = sessionStorage.getItem('openaiApiKey') || '';
-apiKeyInput.addEventListener('input', () => {
-    sessionStorage.setItem('openaiApiKey', apiKeyInput.value.trim());
-});
 
 // --- File Handling ---
 
@@ -63,6 +57,30 @@ function handleFiles(files) {
 
 // --- AI Generation (OpenAI direct call) ---
 
+async function loadOpenAiApiKey() {
+    const response = await fetch('.env', { cache: 'no-store' });
+
+    if (!response.ok) {
+        throw new Error('.env 파일을 찾을 수 없습니다. OPENAI_API_KEY를 설정해주세요.');
+    }
+
+    const envText = await response.text();
+    const env = Object.fromEntries(
+        envText
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith('#') && line.includes('='))
+            .map(line => {
+                const separatorIndex = line.indexOf('=');
+                const key = line.slice(0, separatorIndex).trim();
+                const value = line.slice(separatorIndex + 1).trim().replace(/^['"]|['"]$/g, '');
+                return [key, value];
+            })
+    );
+
+    return env.OPENAI_API_KEY || '';
+}
+
 async function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -73,15 +91,9 @@ async function fileToBase64(file) {
 }
 
 generateBtn.addEventListener('click', async () => {
-    const apiKey = apiKeyInput.value.trim();
     const childName = document.getElementById('child-name').value;
     const keywords = document.getElementById('keywords').value;
     const referenceText = document.getElementById('reference-text').value;
-
-    if (!apiKey) {
-        alert('OpenAI API Key를 입력해주세요.');
-        return;
-    }
 
     if (!childName || !keywords) {
         alert('아이 이름과 상황 키워드를 입력해주세요.');
@@ -90,6 +102,12 @@ generateBtn.addEventListener('click', async () => {
 
     try {
         setLoading(true);
+
+        const apiKey = await loadOpenAiApiKey();
+
+        if (!apiKey) {
+            throw new Error('.env 파일에 OPENAI_API_KEY를 설정해주세요.');
+        }
 
         const imageContents = await Promise.all(
             uploadedFiles.map(async file => ({

@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.svg">
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="main.js?v=2" defer></script>
+    <script type="module" src="main.js?v=3" defer></script>
 </head>
 <body>
     <div class="texture-overlay"></div>
@@ -49,12 +49,6 @@
                 <div class="input-group">
                     <label for="reference-text">기존 알림장 (참조용)</label>
                     <textarea id="reference-text" rows="4" placeholder="참조하고 싶은 기존 문장이나 말투를 입력해 주세요."></textarea>
-                </div>
-
-                <div class="input-group api-key-group">
-                    <label for="api-key">OpenAI API Key</label>
-                    <input type="password" id="api-key" placeholder="sk-...">
-                    <small>키는 서버로 저장하지 않고 현재 브라우저 세션에만 보관됩니다.</small>
                 </div>
 
                 <button id="generate-btn" class="generate-btn">

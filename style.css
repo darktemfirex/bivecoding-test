@@ -201,14 +201,6 @@ header p {
     box-shadow: 0 0 0 3px oklch(80% 0.1 220 / 10%);
 }
 
-.api-key-group small {
-    display: block;
-    margin-top: 0.4rem;
-    color: oklch(60% 0.02 80);
-    font-size: 0.75rem;
-    line-height: 1.4;
-}
-
 .generate-btn {
     width: 100%;
     padding: 1.1rem;
